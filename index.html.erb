@@ -1,0 +1,102 @@
+<div class="min-h-screen bg-gray-50 p-6 pb-24">
+  <div class="max-w-4xl mx-auto">
+    
+    <div class="flex justify-between items-center mb-8">
+      <h1 class="text-3xl font-extrabold text-gray-900">家計簿ログ</h1>
+      <%= link_to '新規登録', new_record_path, class: "bg-indigo-600 text-white px-6 py-2 rounded-full font-bold shadow-md hover:bg-indigo-700 transition" %>
+    </div>
+
+    <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 mb-8">
+      <div class="flex justify-between items-end mb-4">
+        <div>
+          <p class="text-sm font-medium text-gray-500">今月の残り予算</p>
+          <p class="text-4xl font-black <%= (@remaining_budget || 0) < 0 ? 'text-red-500' : 'text-green-600' %> mt-1">
+            ¥<%= number_with_delimiter(@remaining_budget || 0) %>
+          </p>
+        </div>
+
+        <div class="text-right">
+          <%= form_with url: "/update_budget", method: :post, local: true, class: "flex flex-col items-end" do |f| %>
+            <label class="text-xs text-gray-400">全体予算設定</label>
+            <div class="flex mt-1">
+              <%= f.number_field :amount, value: @budget, class: "w-24 p-1 text-sm border rounded-l-lg focus:outline-none focus:ring-1 focus:ring-indigo-500" %>
+              <%= f.submit "設定", class: "bg-gray-800 text-white px-2 py-1 text-xs rounded-r-lg hover:bg-black cursor-pointer" %>
+            </div>
+          <% end %>
+          <p class="text-sm font-bold text-gray-700 mt-2">全体消費率: <%= @budget_percentage || 0 %>%</p>
+        </div>
+      </div>
+
+      <div class="w-full bg-gray-100 rounded-full h-4 overflow-hidden">
+        <div class="h-full transition-all duration-500 <%= (@budget_percentage || 0) > 90 ? 'bg-red-500' : 'bg-indigo-600' %>" 
+             style="width: <%= @budget_percentage || 0 %>%"></div>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+      <% @categories.each do |category| %>
+        <% 
+          limit = @category_settings[category] || 0
+          spent = @category_totals[category] || 0
+          percent = limit > 0 ? ([ (spent.to_f / limit) * 100, 100 ].min).round : 0
+        %>
+        <div class="bg-white p-5 rounded-3xl border border-gray-100 shadow-sm">
+          <div class="flex justify-between items-start mb-3">
+            <div>
+              <span class="text-lg font-bold text-gray-700"><%= category %></span>
+              <p class="text-xs text-gray-400">支出: ¥<%= number_with_delimiter(spent) %></p>
+            </div>
+            <%= form_with url: "/update_category_budget", method: :post, local: true, class: "flex" do |f| %>
+              <%= f.hidden_field :category, value: category %>
+              <%= f.number_field :amount, value: limit, class: "w-16 p-1 text-xs border rounded-l-md outline-none" %>
+              <%= f.submit "OK", class: "bg-indigo-50 text-indigo-600 px-2 py-1 text-xs font-bold rounded-r-md hover:bg-indigo-100 cursor-pointer" %>
+            <% end %>
+          </div>
+          <div class="w-full bg-gray-100 rounded-full h-2 overflow-hidden">
+            <div class="h-full <%= percent > 90 ? 'bg-red-400' : 'bg-indigo-400' %>" style="width: <%= percent %>%"></div>
+          </div>
+        </div>
+      <% end %>
+    </div>
+
+    <h2 class="text-xl font-bold text-gray-900 mb-4 px-2">最近の記録</h2>
+    <div class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
+      <div class="divide-y divide-gray-100">
+        <% if @records.present? %>
+          <% @records.order(date: :desc).each do |record| %>
+            <div class="p-5 flex justify-between items-center hover:bg-gray-50 transition">
+              <div class="space-y-1">
+                <div class="flex items-center space-x-2">
+                  <span class="inline-block px-3 py-1 rounded-full text-xs font-bold bg-indigo-100 text-indigo-700">
+                    <%= record.category %>
+                  </span>
+                  <% if record.name.present? %>
+                    <span class="text-xs font-bold text-gray-500">👤 <%= record.name %></span>
+                  <% end %>
+                </div>
+                <p class="text-xs text-gray-400"><%= record.date %></p>
+                <% if record.memo.present? %>
+                  <p class="text-sm text-gray-600 bg-gray-50 p-2 rounded-lg"><%= record.memo %></p>
+                <% end %>
+              </div>
+              
+              <div class="text-right">
+                <p class="text-xl font-bold text-gray-800">- ¥<%= number_with_delimiter(record.amount) %></p>
+                <div class="flex space-x-3 mt-2 justify-end">
+                  <%= link_to '編集', edit_record_path(record), class: "text-xs text-blue-500 hover:text-blue-700" %>
+                  <%= button_to '削除', record, method: :delete, data: { confirm: '本当に削除しますか？' }, class: "text-xs text-red-400 hover:text-red-600" %>
+                </div>
+              </div>
+            </div>
+          <% end %>
+        <% else %>
+          <p class="p-10 text-center text-gray-400">データがありません。右上の「新規登録」から入力しましょう！</p>
+        <% end %>
+      </div>
+    </div>
+
+  </div>
+  <div class="bg-yellow-100 p-2 text-xs">
+  デバッグ情報: データベース内の全レコード数 = <%= Record.count %>件
+</div>
+</div>
