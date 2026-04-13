@@ -1,0 +1,52 @@
+<div class="min-h-screen bg-gray-50 p-6">
+  <div class="max-w-md mx-auto">
+    
+    <div class="flex items-center mb-8">
+      <%= link_to "/", class: "text-gray-400 hover:text-gray-600 mr-4" do %>
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="10 19l-7-7m0 0l7-7m-7 7h18" />
+        </svg>
+      <% end %>
+      <h1 class="text-2xl font-black text-gray-900">新規登録</h1>
+    </div>
+
+    <div class="bg-white rounded-3xl shadow-xl border border-gray-100 p-8">
+      
+      <%# --- ここが重要！ form_with を一番上に持ってくる --- %>
+      <%= form_with(model: @record, local: true, class: "space-y-6") do |f| %>
+        
+        <%# 名前入力 %>
+        <div>
+          <label class="block text-sm font-bold text-gray-700 mb-2">名前</label>
+          <%= f.text_field :name, class: "w-full p-4 bg-gray-50 border-none rounded-2xl text-gray-700 font-bold focus:ring-2 focus:ring-indigo-500", placeholder: "例：お父さん、自分" %>
+        </div>
+
+        <%# 金額入力 %>
+        <div>
+          <label class="block text-sm font-bold text-gray-700 mb-2">金額</label>
+          <div class="relative">
+            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold">¥</span>
+            <%= f.number_field :amount, class: "w-full pl-10 pr-4 py-4 bg-gray-50 border-none rounded-2xl text-2xl font-black text-gray-900 focus:ring-2 focus:ring-indigo-500", placeholder: "0" %>
+          </div>
+        </div>
+
+        <%# カテゴリ選択 %>
+        <div>
+          <label class="block text-sm font-bold text-gray-700 mb-2">カテゴリ</label>
+          <%= f.select :category, ["食費", "日用品", "娯楽", "交際費", "交通費", "その他"], {}, { class: "w-full p-4 bg-gray-50 border-none rounded-2xl text-gray-700 font-bold focus:ring-2 focus:ring-indigo-500 appearance-none" } %>
+        </div>
+
+        <%# 保存ボタン %>
+        <div class="pt-4">
+          <%= f.submit "記録する", class: "w-full py-4 bg-indigo-600 text-white text-lg font-black rounded-2xl shadow-lg hover:bg-indigo-700 transition-all cursor-pointer" %>
+        </div>
+        <div>
+          <label class="block text-sm font-bold text-gray-700 mb-2">日付</label>
+          <%= f.date_field :date, value: Time.now.strftime('%Y-%m-%d'), class: "w-full p-4 bg-gray-50 border-none rounded-2xl text-gray-700 font-bold focus:ring-2 focus:ring-indigo-500" %>
+        </div>
+      <% end %>
+      <%# --- ここまでが有効範囲 --- %>
+
+    </div>
+  </div>
+</div>
